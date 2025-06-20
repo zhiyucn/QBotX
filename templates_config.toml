@@ -1,0 +1,57 @@
+[config]
+version = "0.0.2" # 版本号
+version_id = 2 # 版本ID，用于升级配置文件，比如版本号0.0.2就是2，版本号0.1.0就是10，版本号1.0.0就是100，以此类推
+
+[api_service]
+base_url = "https://api.siliconflow.cn/" # API服务地址，默认硅基流动
+api_key = "sk-"
+
+[database]
+type = "sqlite" # 目前只做了sqlite
+path = "data.db"
+
+[logging]
+level = "info"
+
+[chat_llm]
+# 生成回答的大语言模型，对回答影响较大
+model = "deepseek-ai/DeepSeek-V3" # 默认使用deepseek v3
+
+[memory_llm]
+# 总结记忆的大语言模型，对回答影响较小，建议使用小模型
+model = "THUDM/glm-4-9b-chat" # 默认使用9b参数量的glm-4
+
+[think_llm]
+# 思考问题的大语言模型，对回答影响中等
+model = "deepseek-ai/DeepSeek-V2.5" # 默认使用deepseek v2.5
+[image_vlm]
+# 识图模型，必须是VLM，不建议使用太大的模型
+model = "Qwen/Qwen2.5-VL-32B-Instruct" # 默认使用32b参数量的qwen2.5
+
+[connect]
+# 与onebot的连接方式
+# 由于作者使用napcat登录qq会被踢，所以只能使用gocq，至于napcat的支持，以后可能会加上，不过都是OneBot协议，所以应该是可以的
+# 目前支持的连接方式有：onebot
+type = "onebot" # 默认使用onebot
+websocket_listen_port = 8080 # 程序会监听这个端口，需要与onebot实现的配置一致，否则无法连接
+
+[personality] # 人格配置
+name = "" # 机器人的名字，会影响回答的内容
+personality_core = "" # 人格核心，会影响回答的内容，建议使用中文，50字以内，要是让我见到写1000字的人格，我就要敲你脑袋！！！
+personality_side = []
+# 语言风格
+language_style = "" # 这里可以直接复制MaiMBot的
+world = "reality" # 世界，可以输入reality或者dummy，reality代表让你的机器人扮演现实世界的人类，所以会有一些限制，dummy代表一个虚拟的世界，也就是虚拟角色，有一些角色扮演的限制，比如字数不能太少等
+
+[emoji]
+# 表情包小偷
+emoji_stolen = true # 是否启用
+emoji_stolen_num = 10 # 最多偷取多少个，目前没做
+emoji_stolen_need = 0.7 # 偷取的概率，0-1之间，越大越容易偷取
+use_emoji_need = 0.1 # 使用表情包的概率，0-1之间，越大越容易使用
+
+# 实验性功能
+[experiment]
+# 自定义适配器
+adapter_custom = true # 是否启用自定义适配器
+adapter_custom_path = "onebot" # 自定义适配器的模块名称

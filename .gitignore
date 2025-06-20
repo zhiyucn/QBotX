@@ -1,0 +1,7 @@
+/emoji/
+config.toml
+data.db
+matrix_config.toml
+matrix.py
+__pycache__
+.venv

@@ -1,0 +1,1 @@
+group_message = {}
