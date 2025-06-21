@@ -258,7 +258,8 @@ async def handler(message):
         else:
             logger.warning("不回复，原因未知")
             return
-        prompt = generate_prompt(str_message, config, group_message[group_id], nick_name)
+        
+        prompt = generate_prompt(str_message, config, group_message[group_id], nick_name, nick_name, True)
         #print(prompt)  # 打印 prompt，方便调试
         prompt_logger = logger
         prompt_logger.info(prompt)

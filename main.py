@@ -8,7 +8,7 @@ print(f"""{BLUE} ██████╗ ██████╗  ██████
 ██║▄▄ ██║██╔══██╗██║   ██║   ██║    ██╔██╗ 
 ╚██████╔╝██████╔╝╚██████╔╝   ██║   ██╔╝ ██╗
  ╚══▀▀═╝ ╚═════╝  ╚═════╝    ╚═╝   ╚═╝  ╚═╝{RESET}
-A Simple QQ Bot  󰭹 
+A Simple Bot  󰭹 
 zhiyuHD 制作""")
 
 print("本软件在字体采用Nerd Font时效果最佳！")
@@ -31,21 +31,24 @@ logger = lg.get_logger(__name__)
 with open("config.toml", "rb") as f:
     config = tomli.load(f)
 
-VERSION_ID = 2
-VERSION_NAME = "0.0.2"
+VERSION_ID = 3
+VERSION_NAME = "0.0.3"
 logger.info("检查更新......")
 logger.info(f"当前版本为 {VERSION_NAME}")
-resp = requests.get("https://qbotx.zhiyuxl.workers.dev/")
-if resp.status_code == 200:
-    release = resp.json()
-    latest_version = release["app_version_id"]
-    if latest_version > VERSION_ID:
-        logger.info(f"发现新版本: {release["app_version"]}")
-        logger.info(f"更新内容：\n{release['update']}")
+try:
+    resp = requests.get("https://zhiyucn.github.io/qbotx.json")
+    if resp.status_code == 200:
+        release = resp.json()
+        latest_version = release["app_version_id"]
+        if latest_version > VERSION_ID:
+            logger.info(f"发现新版本: {release["app_version"]}")
+            logger.info(f"更新内容：\n{release['update']}")
+        else:
+            logger.info("当前已是最新版本")
     else:
-        logger.info("当前已是最新版本")
-else:
-    logger.error("检查更新失败，你可能无法连接到Cloudflare Worker")
+        logger.error("检查更新失败，你可能无法连接到Github Pages或Github Pages 地址出现变化")
+except:
+    logger.error("检查更新失败，你可能无法连接到Github Pages或Github Pages 地址出现变化")
 
 client = openai.OpenAI(
     api_key=config["api_service"]["api_key"],
@@ -55,22 +58,66 @@ client = openai.OpenAI(
 group_message = {}  # 临时记忆
 async def handler(websocket):
     async for message in websocket:
-        
+        if message == "{'data': {'message_id': 0}, 'message': '', 'retcode': 0, 'status': 'ok'}":
+            continue
         message = json.loads(message)
         # 提取出消息
         # print(message)  # 打印消息，方便调试
         if "meta_event_type" in message and message["meta_event_type"] == "lifecycle":
             continue
-        if "message" not in message:
+        if "message" not in message and "notice_type" not in message:
             continue
-        group_id = message["group_id"]
-        if group_id not in group_message:
-            group_message[group_id] = []
-        nick_name = message["sender"]["nickname"]
-        q_message = message["message"]
-        q_message = decode_array(q_message)
-        str_message = f"{nick_name}:"
-        # 构建为字符串
+        if "notice_type" in message and message["notice_type"] == "notify" and message["sub_type"] == "poke":
+            # 处理戳一戳消息
+            sender_id = message["sender_id"]
+            target_id = message["target_id"]
+            group_id = message["group_id"]
+            if group_id not in group_message:
+                group_message[group_id] = []
+            # 查询信息，调用get_group_member_info
+            try:
+                sender_response = await websocket.send(json.dumps({
+                    "action": "get_group_member_info",
+                    "params": {
+                        "group_id": message["group_id"],
+                        "user_id": sender_id
+                    }
+                }))
+                # 等待响应
+                sender_response = await websocket.recv()
+                sender_data = json.loads(sender_response) if sender_response else None
+                sender_name = sender_data['data']['nickname'] if sender_data and 'data' in sender_data else "未知用户"
+                
+                target_response = await websocket.send(json.dumps({
+                    "action": "get_group_member_info",
+                    "params": {
+                        "group_id": message["group_id"],
+                        "user_id": target_id
+                    }
+                }))
+                target_response = await websocket.recv()
+                target_data = json.loads(target_response) if target_response else None
+                target_name = target_data['data']['nickname'] if target_data and 'data' in target_data else "未知用户"
+                
+            except Exception as e:
+                logger.error(e)
+                sender_name = "未知用户"
+                target_name = "未知用户"
+                logger.error(f"获取用户信息失败: {e}")
+            q_message = [{"type":"text","text":f"{sender_name} 戳了戳 {target_name}"}]
+            str_message = ""
+            nick_name = "System"
+        else:
+            logger.info(f"收到消息: {message}")
+            group_id = message.get("group_id", 0)
+            if group_id not in group_message:
+                group_message[group_id] = []
+            nick_name = message["sender"]["nickname"]
+            q_message = message["message"]
+            q_message = decode_array(q_message)
+            str_message = f"{nick_name}:"
+            # 构建为字符串
+        
         for item in q_message:
             if item["type"] == "text":
                 str_message += item["text"]
@@ -267,7 +314,12 @@ async def handler(websocket):
         else:
             logger.warning("不回复，原因未知")
             return
-        prompt = generate_prompt(str_message, config, group_message[group_id], nick_name)
+        # 如果没有sender.user_id
+        if "sender" not in message:
+            sender_user_id = f"戳人者:{sender_id} 被戳者:{target_id}"
+        else:
+            sender_user_id = message["sender"]["user_id"]
+        prompt = generate_prompt(str_message, config, group_message[group_id], nick_name, sender_user_id, False)
         #print(prompt)  # 打印 prompt，方便调试
         prompt_logger = lg.get_logger("提示词")
         prompt_logger.info(prompt)
@@ -329,6 +381,44 @@ async def handler(websocket):
                     }
                 }))
                 logger.info(f"发送了表情：{reply}")
+                continue
+            poke_pattern = r"\[戳一戳：(.*?)\]"  # 匹配形如 [戳一戳：用户QQ] 的内容
+            poke_match = re.search(poke_pattern, item)
+            if poke_match:
+                # 发送戳一戳
+                await websocket.send(json.dumps({
+                    "action": "send_group_msg",
+                    "params": {
+                        "group_id": group_id,
+                        "message": [
+                            {
+                                "type": "poke",
+                                "data": {
+                                    "qq": int(poke_match.group(1))
+                                }
+                            }
+                        ]
+                    }
+                }))
+                continue
+            poke_2_pattern = r"戳一戳：(.*?)"  # 匹配形如 戳一戳：用户QQ 的内容
+            poke_2_match = re.search(poke_2_pattern, item)
+            if poke_2_match:
+                # 发送戳一戳
+                await websocket.send(json.dumps({
+                    "action": "send_group_msg",
+                    "params": {
+                        "group_id": group_id,
+                        "message": [
+                            {
+                                "type": "poke",
+                                "data": {
+                                    "qq": int(poke_2_match.group(1))
+                                }
+                            }
+                        ]
+                    }
+                }))
                 continue
             # 打字速度模拟，等待一会，每个字之间间隔0.6秒
             logger.info(f"艰难打字中：{item}，估计还要{0.3 * len(item)}秒")

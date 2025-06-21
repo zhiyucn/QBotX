@@ -1,6 +1,6 @@
 import logger
 logger = logger.get_logger("提示词生成器")
-def generate_prompt(question, config, group_message, nick_name):
+def generate_prompt(question, config, group_message, nick_name, user_id,custom_adapter):
     # 构建 prompt
     name = config["personality"]["name"]
     personality = config["personality"]["personality_core"]
@@ -30,7 +30,7 @@ def generate_prompt(question, config, group_message, nick_name):
     session.close()
     # 构建 prompt
     prompt = f"""你是{name}，你的人格特征是{personality}，你的侧面特征是{personality_side}，你最近的短期记忆是{short_term_memory}，你最近的长期记忆是{long_term_memory_str}，你的语言风格是{language_style}，
-现在，{nick_name}在群中发布了新的消息：{question}，这条消息引起了你的注意，你需要回复他，根据你的人格特征和侧面特征，以及记忆来回复他，"""
+现在，{nick_name}，他的QQ是{user_id}，他在群中发布了新的消息：{question}，这条消息引起了你的注意，你需要回复他，根据你的人格特征和侧面特征，以及记忆来回复他，"""
     if config["personality"]["world"] == "reality":
         prompt += "你的回复不需要多余的符号，尽量在15字以内。换行代表分割"
     elif config["personality"]["world"] == "dummy":
@@ -58,6 +58,9 @@ def generate_prompt(question, config, group_message, nick_name):
     if random_number < emoji_probability:
         prompt += "\n输出[发送表情：你想表达的情绪]可以发出表情包"
         logger.info("本次回答可以使用表情包")
+    if not custom_adapter:
+        prompt += "\n输出[戳一戳：用户QQ]可以戳一戳用户"
+        prompt += "\n注意不要漏了两个方括号"
     return prompt
 def generate_prompt2(question, config, group_message, nick_name):
     # 构建 prompt
