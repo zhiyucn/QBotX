@@ -1,1 +1,0 @@
-由于添加了自定义适配器功能，配置文件有所改变，请先运行一次config_update.py，然后再编辑config.toml文件
