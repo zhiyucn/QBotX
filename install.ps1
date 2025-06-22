@@ -1,3 +1,4 @@
+chcp 65001
 echo "开始安装QBotX"
 echo "按任意键继续"
 read -n 1 -s
