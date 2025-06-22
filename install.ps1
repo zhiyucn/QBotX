@@ -5,17 +5,24 @@ chcp 65001 | Out-Null
 
 # 安装流程
 Write-Host "开始安装QBotX" -ForegroundColor Cyan
-Write-Host "任务完成请继续" -ForegroundColor Green
 Read-Host -Prompt "按Enter继续"
 
+Write-Host "我们需要一些信息" -ForegroundColor Yellow
+Write-Host "你希望在何处安装QBotX？"
+$installPath = Read-Host "请输入路径（例如：C:\QBotX 默认为D:/QBotX）"
+
+if ($installPath -eq "") {
+    $installPath = "D:/QBotX"
+}
+
 # 克隆仓库
-git clone https://github.com/zhiyucn/QBotX.git
+git clone https://github.com/zhiyucn/QBotX.git $installPath
 
 # 安装UV管理器
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 
 # 设置环境
-cd ./QBotX
+cd $installPath
 uv add -r ./requirements.txt
 copy ./templates_config.toml ./config.toml
 
