@@ -1,17 +1,16 @@
-chcp 65001
-echo "å¼€å§‹å®‰è£…QBotX"
-echo "æŒ‰ä»»æ„é”®ç»§ç»­"
+echo "¿ªÊ¼°²×°QBotX"
+echo "°´ÈÎÒâ¼ü¼ÌÐø"
 Read-Host -Prompt "Press Enter to continue"
-# å…‹éš†QBotXä»“åº“åˆ°æœ¬åœ°
+# ¿ËÂ¡QBotX²Ö¿âµ½±¾µØ
 git clone https://github.com/zhiyucn/QBotX.git
-# å®‰è£…uvç®¡ç†å™¨
+# °²×°uv¹ÜÀíÆ÷
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 cd ./QBotX
 uv add -r ./requirements.txt
 copy ./templates_config.toml ./config.toml
 echo "uv run main.py" > run.bat
-echo "QBotX å·²ç»å®‰è£…å®Œæ¯•ï¼"
-echo "è¯·é…ç½®config.tomlæ–‡ä»¶"
-echo "é…ç½®å®ŒæˆåŽï¼Œä½ å¯ä»¥ä½¿ç”¨run.batæ–‡ä»¶å¯åŠ¨QBotX"
-echo "æŒ‰ä»»æ„é”®ç»§ç»­"
+echo "QBotX ÒÑ¾­°²×°Íê±Ï£¡"
+echo "ÇëÅäÖÃconfig.tomlÎÄ¼þ"
+echo "ÅäÖÃÍê³Éºó£¬Äã¿ÉÒÔÊ¹ÓÃrun.batÎÄ¼þÆô¶¯QBotX"
+echo "°´ÈÎÒâ¼ü¼ÌÐø"
 Read-Host -Prompt "Press Enter to continue"
