@@ -307,11 +307,13 @@ async def handler(websocket):
             return
         if result["reply"] == "no_reply":
             logger.info(f"不回复，原因：{result['because']}")
+            group_message[group_id].append(f"\n{str_message}")
             return
         elif result["reply"] == "ok" or result["reply"] == "'ok'":
             logger.info(f"回复，原因：{result['because']}")
 
         else:
+            group_message[group_id].append(f"\n{str_message}")
             logger.warning("不回复，原因未知")
             return
         # 如果没有sender.user_id
