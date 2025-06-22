@@ -1,11 +1,11 @@
-# 修复乱码的核心设置 - 必须放在脚本最开头
+﻿# 修复中文乱码问题
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
-chcp 65001 | Out-Null  # 设置控制台代码页为UTF-8
+chcp 65001 | Out-Null
 
 # 安装流程
-echo "开始安装QBotX"
-echo "按任意键继续"
+Write-Host "开始安装QBotX" -ForegroundColor Cyan
+Write-Host "任务完成请继续" -ForegroundColor Green
 Read-Host -Prompt "按Enter继续"
 
 # 克隆仓库
@@ -20,10 +20,10 @@ uv add -r ./requirements.txt
 copy ./templates_config.toml ./config.toml
 
 # 创建启动脚本
-echo "uv run main.py" > run.bat
+Set-Content -Path run.bat -Value "uv run main.py" -Encoding UTF8
 
 # 完成提示
-echo "QBotX 已经安装完毕！"
-echo "请配置 config.toml 文件"
-echo "配置完成后，你可以使用 run.bat 文件启动QBotX"
+Write-Host "QBotX 已经安装完毕！" -ForegroundColor Green
+Write-Host "请配置 config.toml 文件" -ForegroundColor Yellow
+Write-Host "配置完成后，你可以使用 run.bat 文件启动QBotX" -ForegroundColor Cyan
 Read-Host -Prompt "按Enter退出"
