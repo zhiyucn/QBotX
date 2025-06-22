@@ -18,6 +18,7 @@ if ($installPath -eq "") {
 # 克隆仓库
 git clone https://github.com/zhiyucn/QBotX.git $installPath
 
+Write-Host "开始安装uv，这可能需要很长时间" -ForegroundColor Green
 # 安装UV管理器
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 
@@ -28,7 +29,7 @@ copy ./templates_config.toml ./config.toml
 
 # 创建启动脚本
 Set-Content -Path run.bat -Value "uv run main.py" -Encoding UTF8
-
+explorer .
 # 完成提示
 Write-Host "QBotX 已经安装完毕！" -ForegroundColor Green
 Write-Host "请配置 config.toml 文件" -ForegroundColor Yellow
