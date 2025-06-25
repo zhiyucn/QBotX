@@ -334,6 +334,7 @@ async def handler(websocket):
                 {"role": "user", "content": prompt}
             ],
             model=config["chat_llm"]["model"],
+            temperature=1.0
         )
         # 提取出回复内容
         reply = response.choices[0].message.content

@@ -20,17 +20,29 @@ def generate_prompt(question, config, group_message, nick_name, user_id,custom_a
     Session = sessionmaker(bind=engine)
     session = Session()
     long_term_memory = session.query(Memory).all()
+    # 计算相似度
+    import Levenshtein
+    # 假设 long_term_memory 是一个包含文本的列表
+    texts = [memory.message for memory in long_term_memory]
+    # 计算Levenshtein距离
+    similarity_scores = [Levenshtein.distance(question, text) for text in texts]
+    # 假设 top_n 是你想要的最相似的记忆数量
+    top_n = 5
+    # 获取相似度最高的记忆的索引(距离越小越相似)
+    most_similar_indices = sorted(range(len(similarity_scores)), key=lambda i: similarity_scores[i])[:top_n]
+    # 获取相似度最高的记忆
+    most_similar_memories = [texts[i] for i in most_similar_indices]
+    # 计算相似度
     # 只读取后 50 条
-    long_term_memory = long_term_memory[-50:]
     # 遍历添加长期记忆中的每个元素
     long_term_memory_str = ""
-    for item in long_term_memory:
-        long_term_memory_str += f"{item.message} 创建时间{item.created_at}\n"
+    for item in most_similar_memories:
+        long_term_memory_str += f"{item} 创建时间{''}\n"
     # 关闭 session
     session.close()
     # 构建 prompt
     prompt = f"""你是{name}，你的人格特征是{personality}，你的侧面特征是{personality_side}，你最近的短期记忆是{short_term_memory}，你最近的长期记忆是{long_term_memory_str}，你的语言风格是{language_style}，
-现在，{nick_name}，他的QQ是{user_id}，他在群中发布了新的消息：{question}，这条消息引起了你的注意，你需要回复他，根据你的人格特征和侧面特征，以及记忆来回复他，"""
+现在，{nick_name}，他的QQ是{user_id}，他在群中发布了新的消息：{question}，这条消息引起了你的注意，你需要回复他"""
     if config["personality"]["world"] == "reality":
         prompt += "你的回复不需要多余的符号，尽量在15字以内。换行代表分割"
     elif config["personality"]["world"] == "dummy":
