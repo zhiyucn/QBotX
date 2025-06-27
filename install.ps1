@@ -12,6 +12,8 @@ if (!(Get-Command git -ErrorAction SilentlyContinue)) {
     Write-Host "git未安装，开始安装" -ForegroundColor Yellow
     Write-Host "请注意，我们使用winget安装，所以会比较慢"
     winget install --id Git.Git -e --source winget
+    # 刷新环境变量
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 }
 
 
