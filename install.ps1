@@ -7,6 +7,14 @@ chcp 65001 | Out-Null
 Write-Host "开始安装QBotX" -ForegroundColor Cyan
 Read-Host -Prompt "按Enter继续"
 
+# 检查git是否安装
+if (!(Get-Command git -ErrorAction SilentlyContinue)) {
+    Write-Host "git未安装，开始安装" -ForegroundColor Yellow
+    Write-Host "请注意，我们使用winget安装，所以会比较慢"
+    winget install --id Git.Git -e --source winget
+}
+
+
 Write-Host "我们需要一些信息" -ForegroundColor Yellow
 Write-Host "你希望在何处安装QBotX？"
 $installPath = Read-Host "请输入路径（例如：C:\QBotX 默认为D:/QBotX）"
@@ -21,11 +29,12 @@ git clone https://github.com/zhiyucn/QBotX.git $installPath
 Write-Host "开始安装uv，这可能需要很长时间" -ForegroundColor Green
 # 安装UV管理器
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-
+# 刷新环境变量
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 # 设置环境
-cd $installPath
+Set-Location $installPath
 uv add -r ./requirements.txt
-copy ./templates_config.toml ./config.toml
+Copy-Item ./templates_config.toml ./config.toml
 
 # 创建启动脚本
 Set-Content -Path run.bat -Value "uv run main.py" -Encoding UTF8
