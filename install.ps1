@@ -23,8 +23,19 @@ if ($installPath -eq "") {
     $installPath = "D:/QBotX"
 }
 
+if ((Get-CimInstance -ClassName Win32_OperatingSystem).Locale -eq "0804") {
+    Write-Host "您可能在中国国内，是否使用gitee克隆仓库？(Y/n)"
+    $useGitee = Read-Host "请输入您的选择"
+    if ($useGitee -eq "Y" -or $useGitee -eq "y" -or $useGitee -eq "") {
+        $repoUrl = "https://gitee.com/zhiyuxl/QBotX.git"
+    } else {
+        $repoUrl = "https://github.com/zhiyucn/QBotX.git"
+    }
+} else {
+    $repoUrl = "https://github.com/zhiyucn/QBotX.git"
+}
 # 克隆仓库
-git clone https://github.com/zhiyucn/QBotX.git $installPath
+git clone $repoUrl $installPath
 
 Write-Host "开始安装uv，这可能需要很长时间" -ForegroundColor Green
 # 安装UV管理器
