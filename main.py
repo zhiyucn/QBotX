@@ -424,8 +424,9 @@ async def handler(websocket):
                 }))
                 continue
             # 打字速度模拟，等待一会，每个字之间间隔0.6秒
-            logger.info(f"艰难打字中：{item}，估计还要{0.3 * len(item)}秒")
-            await asyncio.sleep(0.3 * len(item))  # 等待0.3秒 * 回复内容的长度
+            if config["personality"]["world"] == "reality":
+                logger.info(f"艰难打字中：{item}，估计还要{0.3 * len(item)}秒")
+                await asyncio.sleep(0.3 * len(item))  # 等待0.3秒 * 回复内容的长度
             # 发送回复
             await websocket.send(json.dumps({
                 "action": "send_group_msg",

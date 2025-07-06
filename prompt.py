@@ -71,8 +71,10 @@ def generate_prompt(question, config, group_message, nick_name, user_id,custom_a
         prompt += "\n输出[发送表情：你想表达的情绪]可以发出表情包"
         logger.info("本次回答可以使用表情包")
     if not custom_adapter:
-        prompt += "\n输出[戳一戳：用户QQ]可以戳一戳用户"
-        prompt += "\n注意不要漏了两个方括号"
+        # 5%概率
+        if random.random() < 0.05:
+            prompt += "\n输出[戳一戳：用户QQ]可以戳一戳用户"
+            prompt += "\n注意不要漏了两个方括号"
     prompt += "\n你可以部分违背设定，但不能过于违背"
     return prompt
 def generate_prompt2(question, config, group_message, nick_name):
